@@ -4,14 +4,14 @@ import { Redirect } from "react-router-dom"
 import ErrorList from "./ErrorList"
 import translateServerErrors from "./../services/translateServerErrors"
 
-const NewShowForm = props => {
+const NewShowForm = (props) => {
   const [newShow, setNewShow] = useState({
     title: "",
     network: "",
     premiereYear: "",
-    details: ""
+    description: ""
   })
-  const [errors, setErrors] = useState([])
+  const [errors, setErrors] = useState({})
   const [shouldRedirect, setShouldRedirect] = useState(false)
 
   const addNewShow = async () => {
@@ -24,26 +24,19 @@ const NewShowForm = props => {
         body: JSON.stringify(newShow)
       })
       if (!response.ok) {
-        if(response.status === 422) {
-          const body = await response.json()
-          const newErrors = translateServerErrors(body.errors)
-          return setErrors(newErrors)
-        } else {
-          const errorMessage = `${response.status} (${response.statusText})`
-          const error = new Error(errorMessage)
-          throw(error)
-        }
-      } else {
-        const body = await response.json()
-        console.log("Show created successfully!", body);
-        setShouldRedirect(true)
+        const errorMessage = `${response.status} (${response.statusText})`
+        const error = new Error(errorMessage)
+        throw error
       }
-    } catch(err) {
+      const body = await response.json()
+      console.log("Show created successfully!", body)
+      setShouldRedirect(true)
+    } catch (err) {
       console.error(`Error in fetch: ${err.message}`)
     }
   }
 
-  const handleInputChange = event => {
+  const handleInputChange = (event) => {
     setNewShow({
       ...newShow,
       [event.currentTarget.name]: event.currentTarget.value
@@ -63,25 +56,15 @@ const NewShowForm = props => {
     <>
       <h1>We Have Evidence of a New Best Show!</h1>
       <ErrorList errors={errors} />
-      <form onSubmit={handleSubmit} className="callout" >
+      <form onSubmit={handleSubmit} className="callout">
         <label>
-         Title:
-          <input
-            type="text"
-            name="title"
-            onChange={handleInputChange}
-            value={newShow.title}
-          />
+          Title:
+          <input type="text" name="title" onChange={handleInputChange} value={newShow.title} />
         </label>
 
         <label>
           Network:
-          <input
-            type="text"
-            name="network"
-            onChange={handleInputChange}
-            value={newShow.network}
-          />
+          <input type="text" name="network" onChange={handleInputChange} value={newShow.network} />
         </label>
 
         <label>
