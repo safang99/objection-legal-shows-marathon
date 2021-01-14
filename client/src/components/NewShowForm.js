@@ -9,7 +9,8 @@ const NewShowForm = (props) => {
     title: "",
     network: "",
     premiereYear: "",
-    description: ""
+    description: "",
+    rating: ""
   })
   const [errors, setErrors] = useState({})
   const [shouldRedirect, setShouldRedirect] = useState(false)
@@ -24,9 +25,15 @@ const NewShowForm = (props) => {
         body: JSON.stringify(newShow)
       })
       if (!response.ok) {
-        const errorMessage = `${response.status} (${response.statusText})`
-        const error = new Error(errorMessage)
-        throw error
+        if (response.status === 422) {
+          const body = await response.json()
+          const newError = translateServerErrors(body.errors)
+          return setErrors(newError)
+        } else {
+          const errorMessage = `${response.status} (${response.statusText})`
+          const error = new Error(errorMessage)
+          throw error
+        }
       }
       const body = await response.json()
       console.log("Show created successfully!", body)
@@ -85,6 +92,11 @@ const NewShowForm = (props) => {
             onChange={handleInputChange}
             value={newShow.description}
           />
+        </label>
+
+        <label>
+          Rating:
+          <input type="number" name="rating" onChange={handleInputChange} value={newShow.rating} />
         </label>
 
         <div className="button-group">
